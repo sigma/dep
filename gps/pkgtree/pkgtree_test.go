@@ -864,7 +864,6 @@ func TestListPackages(t *testing.T) {
 							Imports: []string{
 								"github.com/golang/dep/gps",
 								"sort",
-								"unicode",
 							},
 						},
 					},
@@ -885,7 +884,6 @@ func TestListPackages(t *testing.T) {
 							Imports: []string{
 								"github.com/golang/dep/gps",
 								"sort",
-								"unicode",
 							},
 						},
 					},
@@ -906,7 +904,6 @@ func TestListPackages(t *testing.T) {
 							Imports: []string{
 								"github.com/golang/dep/gps",
 								"sort",
-								"unicode",
 							},
 						},
 					},
@@ -927,7 +924,6 @@ func TestListPackages(t *testing.T) {
 							Imports: []string{
 								"github.com/golang/dep/gps",
 								"sort",
-								"unicode",
 							},
 							TestImports: []string{
 								"math/rand",
