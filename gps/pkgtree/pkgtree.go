@@ -273,7 +273,6 @@ func fillPackage(p *build.Package) error {
 
 			for _, t := range strings.FieldsFunc(ct[len(buildPrefix):], buildFieldSplit) {
 				// hardcoded (for now) handling for the "ignore" build tag
-				// We "soft" ignore the files tagged with ignore so that we pull in their imports.
 				if t == "ignore" {
 					ignored = true
 				}
@@ -290,6 +289,10 @@ func fillPackage(p *build.Package) error {
 				p.Name = pf.Name.Name
 			}
 			p.GoFiles = append(p.GoFiles, fname)
+		}
+
+		if ignored {
+			continue
 		}
 
 		for _, is := range pf.Imports {
