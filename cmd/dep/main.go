@@ -70,6 +70,7 @@ func (c *Config) Run() int {
 		&pruneCommand{},
 		&hashinCommand{},
 		&versionCommand{},
+		&workspaceCommand{},
 	}
 
 	examples := [...][2]string{
