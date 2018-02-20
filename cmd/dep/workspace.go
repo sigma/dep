@@ -275,16 +275,29 @@ func (cmd *workspaceCommand) Run(ctx *dep.Ctx, args []string) error {
 		return sw.PrintPreparedActions(ctx.Out, ctx.Verbose)
 	}
 
+	logger := ctx.Err
+	if !ctx.Verbose {
+		logger = log.New(ioutil.Discard, "", 0)
+	}
+
+	err = sw.Write(w.AbsRoot, sm, false, logger)
+	if err != nil {
+		return errors.Wrap(err, "grouped write of manifest, lock and vendor")
+	}
+
+	// TODO(yhodique) maybe do something less horrible?
 	vendorPath := filepath.Join(w.AbsRoot, "vendor")
 	for _, p := range w.Manifest.Packages {
 		projectRoot := filepath.Join(w.AbsRoot, p.Path)
 		relVendorPath, _ := filepath.Rel(projectRoot, vendorPath)
 		_ = os.Symlink(relVendorPath, filepath.Join(projectRoot, "vendor"))
+
+		vendorProjectPath := filepath.Join(vendorPath, p.Name)
+		vendorProjectDirPath := filepath.Dir(vendorProjectPath)
+		os.MkdirAll(vendorProjectDirPath, 0755)
+		relVendorProjectPath, _ := filepath.Rel(vendorProjectDirPath, projectRoot)
+		_ = os.Symlink(relVendorProjectPath, vendorProjectPath)
 	}
 
-	logger := ctx.Err
-	if !ctx.Verbose {
-		logger = log.New(ioutil.Discard, "", 0)
-	}
-	return errors.Wrap(sw.Write(w.AbsRoot, sm, false, logger), "grouped write of manifest, lock and vendor")
+	return nil
 }
