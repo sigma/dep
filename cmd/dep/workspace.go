@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"context"
 	"flag"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -160,13 +161,20 @@ func (w *Workspace) Overrides() gps.ProjectConstraints {
 }
 
 func (w *Workspace) IgnoredPackages() *pkgtree.IgnoredRuleset {
-	ignored := new(pkgtree.IgnoredRuleset)
-	return ignored
+	ignored := make([]string, len(w.Manifest.Packages))
+	for i, p := range w.Manifest.Packages {
+		ignored[i] = fmt.Sprintf("%s/*", p.Name)
+	}
+	return pkgtree.NewIgnoredRuleset(ignored)
 }
 
 func (w *Workspace) RequiredPackages() map[string]bool {
-	// TODO(yhodique) implement this
 	required := make(map[string]bool)
+	for _, p := range w.Projects {
+		for k, v := range p.Manifest.RequiredPackages() {
+			required[k] = v
+		}
+	}
 	return required
 }
 
