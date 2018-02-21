@@ -327,7 +327,9 @@ func (cmd *workspaceCommand) Run(ctx *dep.Ctx, args []string) error {
 	for _, p := range w.Manifest.Packages {
 		projectRoot := filepath.Join(w.AbsRoot, p.Path)
 		relVendorPath, _ := filepath.Rel(projectRoot, vendorPath)
-		_ = os.Symlink(relVendorPath, filepath.Join(projectRoot, "vendor"))
+		if p.Path != "." {
+			_ = os.Symlink(relVendorPath, filepath.Join(projectRoot, "vendor"))
+		}
 
 		vendorProjectPath := filepath.Join(vendorPath, p.Name)
 		vendorProjectDirPath := filepath.Dir(vendorProjectPath)
