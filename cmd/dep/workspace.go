@@ -14,9 +14,11 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/golang/dep"
 	"github.com/golang/dep/gps"
+	"github.com/golang/dep/gps/paths"
 	"github.com/golang/dep/gps/pkgtree"
 	toml "github.com/pelletier/go-toml"
 	"github.com/pkg/errors"
@@ -102,6 +104,14 @@ func (m *Manifest) getProjects(ctx *dep.Ctx) ([]*dep.Project, error) {
 	for i, pck := range m.Packages {
 		ctx.WorkingDir = filepath.Join(wd, pck.Path)
 		p, _ := ctx.LoadProject()
+		for _, pck2 := range m.Packages {
+			if pck2 == pck {
+				continue
+			}
+			ign := fmt.Sprintf("%s/*", pck2.Name)
+			p.Manifest.Ignored = append(p.Manifest.Ignored, ign)
+		}
+		p.ImportRoot = gps.ProjectRoot(pck.Name)
 		projects[i] = p
 	}
 	ctx.WorkingDir = wd
@@ -173,11 +183,12 @@ func (w *Workspace) Overrides() gps.ProjectConstraints {
 }
 
 func (w *Workspace) IgnoredPackages() *pkgtree.IgnoredRuleset {
-	ignored := make([]string, len(w.Manifest.Packages))
-	for i, p := range w.Manifest.Packages {
-		ignored[i] = fmt.Sprintf("%s/*", p.Name)
-	}
-	return pkgtree.NewIgnoredRuleset(ignored)
+	// ignored := make([]string, len(w.Manifest.Packages))
+	// for i, p := range w.Manifest.Packages {
+	// 	ignored[i] = fmt.Sprintf("%s/*", p.Name)
+	// }
+	// return pkgtree.NewIgnoredRuleset(ignored)
+	return pkgtree.NewIgnoredRuleset(make([]string, 0))
 }
 
 func (w *Workspace) RequiredPackages() map[string]bool {
@@ -190,10 +201,24 @@ func (w *Workspace) RequiredPackages() map[string]bool {
 	return required
 }
 
+func (w *Workspace) ImportPathFilter(path string) bool {
+	if paths.IsStandardImportPath(path) {
+		return true
+	}
+
+	for _, p := range w.Manifest.Packages {
+		if strings.HasPrefix(path, p.Name) {
+			return true
+		}
+	}
+	return false
+}
+
 func (w *Workspace) MakeParams() gps.SolveParameters {
 	params := gps.SolveParameters{
 		RootDir:         w.AbsRoot,
 		ProjectAnalyzer: dep.Analyzer{},
+		StdLibFn:        w.ImportPathFilter,
 	}
 
 	params.Manifest = w
