@@ -99,7 +99,7 @@ type SolveParameters struct {
 
 	// stdLibFn is the function to use to recognize standard library import paths.
 	// Only overridden for tests. Defaults to paths.IsStandardImportPath if nil.
-	stdLibFn func(string) bool
+	StdLibFn func(string) bool
 
 	// mkBridgeFn is the function to use to create sourceBridges.
 	// Only overridden for tests (so we can run with virtual RootDir).
@@ -284,13 +284,13 @@ func Prepare(params SolveParameters, sm SourceManager) (Solver, error) {
 		return nil, err
 	}
 
-	if params.stdLibFn == nil {
-		params.stdLibFn = paths.IsStandardImportPath
+	if params.StdLibFn == nil {
+		params.StdLibFn = paths.IsStandardImportPath
 	}
 
 	s := &solver{
 		tl:       params.TraceLogger,
-		stdLibFn: params.stdLibFn,
+		stdLibFn: params.StdLibFn,
 		rd:       rd,
 	}
 

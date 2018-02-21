@@ -29,7 +29,7 @@ func fixSolve(params SolveParameters, sm SourceManager, t *testing.T) (Solution,
 	params.TraceLogger = log.New(test.Writer{TB: t}, "", 0)
 	// always return false, otherwise it would identify pretty much all of
 	// our fixtures as being stdlib and skip everything
-	params.stdLibFn = func(string) bool { return false }
+	params.StdLibFn = func(string) bool { return false }
 	params.mkBridgeFn = overrideMkBridge
 	s, err := Prepare(params, sm)
 	if err != nil {

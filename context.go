@@ -173,7 +173,7 @@ func (c *Ctx) LoadProject() (*Project, error) {
 	}
 	defer lf.Close()
 
-	p.Lock, err = readLock(lf)
+	p.Lock, err = ReadLock(lf)
 	if err != nil {
 		return nil, errors.Wrapf(err, "error while parsing %s", lp)
 	}

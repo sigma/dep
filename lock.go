@@ -55,7 +55,7 @@ type rawLockedProject struct {
 	Packages []string `toml:"packages"`
 }
 
-func readLock(r io.Reader) (*Lock, error) {
+func ReadLock(r io.Reader) (*Lock, error) {
 	buf := &bytes.Buffer{}
 	_, err := buf.ReadFrom(r)
 	if err != nil {

@@ -77,7 +77,7 @@ func (pc *TestProjectContext) Load() {
 	if pc.h.Exist(lp) {
 		lf := pc.h.GetFile(lp)
 		defer lf.Close()
-		l, err = readLock(lf)
+		l, err = ReadLock(lf)
 		pc.h.Must(errors.Wrapf(err, "Unable to read lock at %s", lp))
 	}
 	pc.Project.Manifest = m

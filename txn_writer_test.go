@@ -420,7 +420,7 @@ func TestSafeWriter_NewLock(t *testing.T) {
 
 	lf := h.GetTestFile(safeWriterGoldenLock)
 	defer lf.Close()
-	newLock, err := readLock(lf)
+	newLock, err := ReadLock(lf)
 	h.Must(err)
 	sw, _ := NewSafeWriter(nil, nil, newLock, VendorOnChanged, defaultCascadingPruneOptions())
 
@@ -467,7 +467,7 @@ func TestSafeWriter_NewLockSkipVendor(t *testing.T) {
 
 	lf := h.GetTestFile(safeWriterGoldenLock)
 	defer lf.Close()
-	newLock, err := readLock(lf)
+	newLock, err := ReadLock(lf)
 	h.Must(err)
 	sw, _ := NewSafeWriter(nil, nil, newLock, VendorNever, defaultCascadingPruneOptions())
 
@@ -515,7 +515,7 @@ func TestSafeWriter_DiffLocks(t *testing.T) {
 
 	ulf := h.GetTestFile("txn_writer/updated_lock.toml")
 	defer ulf.Close()
-	updatedLock, err := readLock(ulf)
+	updatedLock, err := ReadLock(ulf)
 	h.Must(err)
 
 	sw, _ := NewSafeWriter(nil, pc.Project.Lock, updatedLock, VendorOnChanged, defaultCascadingPruneOptions())

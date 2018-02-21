@@ -23,7 +23,7 @@ func TestHashInputs(t *testing.T) {
 		RootPackageTree: fix.rootTree(),
 		Manifest:        fix.rootmanifest(),
 		ProjectAnalyzer: naiveAnalyzer{},
-		stdLibFn:        func(string) bool { return false },
+		StdLibFn:        func(string) bool { return false },
 		mkBridgeFn:      overrideMkBridge,
 	}
 
@@ -73,7 +73,7 @@ func TestHashInputsReqsIgs(t *testing.T) {
 		RootPackageTree: fix.rootTree(),
 		Manifest:        rm,
 		ProjectAnalyzer: naiveAnalyzer{},
-		stdLibFn:        func(string) bool { return false },
+		StdLibFn:        func(string) bool { return false },
 		mkBridgeFn:      overrideMkBridge,
 	}
 
@@ -204,7 +204,7 @@ func TestHashInputsOverrides(t *testing.T) {
 		RootPackageTree: basefix.rootTree(),
 		Manifest:        rm,
 		ProjectAnalyzer: naiveAnalyzer{},
-		stdLibFn:        func(string) bool { return false },
+		StdLibFn:        func(string) bool { return false },
 		mkBridgeFn:      overrideMkBridge,
 	}
 
@@ -604,7 +604,7 @@ func TestHashInputsIneffectualWildcardIgs(t *testing.T) {
 		RootPackageTree: fix.rootTree(),
 		Manifest:        rm,
 		ProjectAnalyzer: naiveAnalyzer{},
-		stdLibFn:        func(string) bool { return false },
+		StdLibFn:        func(string) bool { return false },
 		mkBridgeFn:      overrideMkBridge,
 	}
 
