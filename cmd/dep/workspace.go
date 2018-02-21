@@ -84,6 +84,17 @@ func NewManifest(root string) *Manifest {
 	return m
 }
 
+func NewLock(root string) *dep.Lock {
+	mp := filepath.Join(root, dep.LockName)
+	mf, err := os.Open(mp)
+	if err != nil {
+		return nil
+	}
+	defer mf.Close()
+	l, _ := dep.ReadLock(mf)
+	return l
+}
+
 func (m *Manifest) getProjects(ctx *dep.Ctx) ([]*dep.Project, error) {
 	projects := make([]*dep.Project, len(m.Packages))
 	// TODO(yhodique) ugh, that working dir dance is disgusting
@@ -115,11 +126,12 @@ type Workspace struct {
 
 func NewWorkspace(ctx *dep.Ctx) (*Workspace, error) {
 	m := NewManifest(ctx.WorkingDir)
+	l := NewLock(ctx.WorkingDir)
 	projects, err := m.getProjects(ctx)
 
 	return &Workspace{
 		AbsRoot:  ctx.WorkingDir,
-		Lock:     nil,
+		Lock:     l,
 		Manifest: m,
 		Projects: projects,
 	}, err
