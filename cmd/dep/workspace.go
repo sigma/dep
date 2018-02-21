@@ -72,7 +72,7 @@ func fromRawManifest(raw rawManifest) *Manifest {
 	return &Manifest{
 		Packages: raw.Packages,
 		PruneOptions: gps.CascadingPruneOptions{
-			DefaultOptions:    (gps.PruneNestedVendorDirs | gps.PruneGoTestFiles | gps.PruneUnusedPackages),
+			DefaultOptions:    (gps.PruneNestedVendorDirs | gps.PruneGoTestFiles | gps.PruneNonGoFiles | gps.PruneUnusedPackages),
 			PerProjectOptions: make(map[gps.ProjectRoot]gps.PruneOptionSet),
 		},
 	}
