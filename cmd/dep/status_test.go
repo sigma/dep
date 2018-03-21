@@ -17,6 +17,7 @@ import (
 
 	"github.com/golang/dep"
 	"github.com/golang/dep/gps"
+	"github.com/golang/dep/internal/kdep"
 	"github.com/golang/dep/internal/test"
 	"github.com/pkg/errors"
 )
@@ -39,7 +40,10 @@ func TestStatusFormatVersion(t *testing.T) {
 }
 
 func TestBasicLine(t *testing.T) {
-	project := dep.Project{}
+	kctx := &kdep.Ctx{Ctx: nil}
+	p := &dep.Project{}
+	project, _ := kdep.WrapProject(p, kctx)
+
 	aSemverConstraint, _ := gps.NewSemverConstraint("1.2.3")
 
 	templateString := "PR:{{.ProjectRoot}}, Const:{{.Constraint}}, Ver:{{.Version}}, Rev:{{.Revision}}, Lat:{{.Latest}}, PkgCt:{{.PackageCount}}"
@@ -123,7 +127,7 @@ func TestBasicLine(t *testing.T) {
 			var buf bytes.Buffer
 
 			dotout := &dotOutput{
-				p: &project,
+				p: project,
 				w: &buf,
 			}
 			dotout.BasicHeader()
@@ -474,7 +478,9 @@ func TestCollectConstraints(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			p.Lock = &c.lock
-			gotConstraints, err := collectConstraints(ctx, p, sm)
+			kctx := &kdep.Ctx{Ctx: ctx}
+			kp, _ := kdep.WrapProject(p, kctx)
+			gotConstraints, err := collectConstraints(kctx, kp, sm)
 			if len(err) > 0 && !c.wantErr {
 				t.Fatalf("unexpected errors while collecting constraints: %v", err)
 			} else if len(err) == 0 && c.wantErr {

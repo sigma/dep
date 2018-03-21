@@ -21,6 +21,7 @@ import (
 
 	"github.com/golang/dep"
 	"github.com/golang/dep/internal/fs"
+	"github.com/golang/dep/internal/kdep"
 )
 
 var (
@@ -35,7 +36,16 @@ type command interface {
 	LongHelp() string       // "Foo the first bar meeting the following conditions..."
 	Register(*flag.FlagSet) // command-specific flags
 	Hidden() bool           // indicates whether the command should be hidden from help output
-	Run(*dep.Ctx, []string) error
+	Run(*kdep.Ctx, []string) error
+}
+
+func init() {
+	// integration tests use a binary named "testdep" and definitely expect dep
+	// semantics...
+	basename := filepath.Base(os.Args[0])
+	if strings.TrimSuffix(basename, filepath.Ext(basename)) == "testdep" {
+		kdep.FallbackToDep = true
+	}
 }
 
 func main() {
@@ -225,11 +235,13 @@ func (c *Config) Run() int {
 				Cachedir:       cachedir,
 			}
 
+			kctx := &kdep.Ctx{Ctx: ctx}
+
 			GOPATHS := filepath.SplitList(getEnv(c.Env, "GOPATH"))
 			ctx.SetPaths(c.WorkingDir, GOPATHS...)
 
 			// Run the command with the post-flag-processing args.
-			if err := cmd.Run(ctx, flags.Args()); err != nil {
+			if err := cmd.Run(kctx, flags.Args()); err != nil {
 				errLogger.Printf("%v\n", err)
 				return errorExitCode
 			}
