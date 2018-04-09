@@ -507,6 +507,7 @@ func (t PackageTree) Split(m LocalImportRootMap) ([]PackageTree, error) {
 			npr := t.normalizeSource(pr)
 			if strings.HasPrefix(path, npr) {
 				ir := m[pr]
+				// leave errors alone, reparent packages
 				if pack.Err == nil {
 					ip := pack.P.ImportPath
 					ip = strings.TrimPrefix(ip, npr)

@@ -14,7 +14,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/armon/go-radix"
+	radix "github.com/armon/go-radix"
 	"github.com/golang/dep/gps/paths"
 	"github.com/golang/dep/gps/pkgtree"
 	"github.com/pkg/errors"
@@ -167,6 +167,18 @@ type solver struct {
 	// Indicates whether the solver has been run. It is invalid to run this type
 	// of solver more than once.
 	hasrun int32
+}
+
+func (params SolveParameters) computeLocalImportMap() (pkgtree.LocalImportRootMap, error) {
+	m := pkgtree.LocalImportRootMap{
+		".": params.RootPackageTree.ImportRoot,
+	}
+	for pr, pp := range params.Manifest.DependencyConstraints() {
+		if strings.HasPrefix(pp.Source, "./") { // source is local
+			m[pp.Source] = string(pr)
+		}
+	}
+	return m, nil
 }
 
 func (params SolveParameters) toRootdata() (rootdata, error) {
