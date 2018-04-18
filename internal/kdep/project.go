@@ -39,6 +39,15 @@ type Project struct {
 
 // WrapProject wraps a dep.Project in a kdep.Project
 func WrapProject(p *dep.Project, c *Ctx) (*Project, error) {
+	m := manifestFromProject(p)
+	// If the project has nothing to do with kdep, fallback to dep behavior.
+	// Testing for !FallbackToDep is important because otherwise it generates
+	// artifical race conditions in parallel tests (in normal dep usage, we're
+	// very much single-threaded at this point).
+	if !FallbackToDep && (m == nil || (!m.Meta.IsKdepRoot && !m.Meta.IsKdepChild)) {
+		FallbackToDep = true
+	}
+
 	if FallbackToDep {
 		var m *Manifest
 		if p != nil {
@@ -48,9 +57,8 @@ func WrapProject(p *dep.Project, c *Ctx) (*Project, error) {
 		}
 		return &Project{p, m, nil, nil}, nil
 	}
-	m := manifestFromProject(p)
-	if m == nil || !m.Meta.IsKdepRoot {
-		return nil, fmt.Errorf("not a kdep project")
+	if !m.Meta.IsKdepRoot {
+		return nil, fmt.Errorf("not a kdep root")
 	}
 
 	sps := make([]*dep.Project, len(m.Meta.LocalDeps))
