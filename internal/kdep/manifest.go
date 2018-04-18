@@ -31,6 +31,7 @@ import (
 // Metadata holds kdep metadata information
 type Metadata struct {
 	IsKdepRoot   bool     `toml:"kdep-project,omitempty"`
+	IsKdepChild  bool     `toml:"kdep-child,omitempty"`
 	LocalGopaths []string `toml:"kdep-local-gopaths"`
 	LocalDeps    []string `toml:"kdep-local-deps"`
 }
