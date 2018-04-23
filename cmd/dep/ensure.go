@@ -329,6 +329,10 @@ func (cmd *ensureCommand) runDefault(ctx *kdep.Ctx, args []string, p *kdep.Proje
 		return errors.Wrap(err, "grouped write of manifest, lock and vendor")
 	}
 
+	err = p.HackGodepsCompat(solution)
+	if err != nil {
+		return errors.Wrap(err, "failed to generate Godeps.json")
+	}
 	return p.HackExtraVendorEntries()
 }
 
@@ -424,6 +428,10 @@ func (cmd *ensureCommand) runUpdate(ctx *kdep.Ctx, args []string, p *kdep.Projec
 		return errors.Wrap(err, "grouped write of manifest, lock and vendor")
 	}
 
+	err = p.HackGodepsCompat(solution)
+	if err != nil {
+		return errors.Wrap(err, "failed to generate Godeps.json")
+	}
 	return p.HackExtraVendorEntries()
 }
 
