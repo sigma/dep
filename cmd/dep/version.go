@@ -32,7 +32,7 @@ func (cmd *versionCommand) Register(fs *flag.FlagSet) {}
 type versionCommand struct{}
 
 func (cmd *versionCommand) Run(ctx *kdep.Ctx, args []string) error {
-	ctx.Out.Printf(`dep:
+	ctx.Out.Printf(`dep [k8s flavor]:
  version     : %s
  build date  : %s
  git hash    : %s
