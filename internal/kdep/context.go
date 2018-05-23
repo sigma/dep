@@ -21,6 +21,7 @@ import (
 	"path/filepath"
 
 	"github.com/golang/dep"
+	"github.com/golang/dep/gps/pkgtree"
 )
 
 // Ctx wraps dep.Ctx to support kdep projects
@@ -43,6 +44,9 @@ func (c *Ctx) LoadProject() (*Project, error) {
 
 		proj, err := WrapProject(p, c)
 		if err == nil {
+			// honor kdep uninteresting tags as declared in the main project's
+			// manifest
+			setupBuildTagsStrategy(proj)
 			return proj, err
 		}
 
@@ -51,5 +55,12 @@ func (c *Ctx) LoadProject() (*Project, error) {
 			return nil, fmt.Errorf("no project found")
 		}
 		c.SetPaths(parent, c.GOPATHs...)
+	}
+}
+
+func setupBuildTagsStrategy(p *Project) {
+	s := pkgtree.DefaultStrategy()
+	for _, t := range p.Manifest.Meta.UninterestingTags {
+		s.AddUninterestingTag(t)
 	}
 }
