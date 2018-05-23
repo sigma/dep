@@ -39,6 +39,34 @@ var vcsRoots = map[string]struct{}{
 	".hg":  {},
 }
 
+// Strategy describes a build-tag strategy.
+type Strategy struct {
+	uninterestingTags []string
+}
+
+var defaultStrategySingleton = Strategy{
+	uninterestingTags: []string{"ignore"},
+}
+
+// DefaultStrategy returns the default build-tag strategy.
+func DefaultStrategy() *Strategy {
+	return &defaultStrategySingleton
+}
+
+// AddUninterestingTag teaches a strategy to disregard a particular tag.
+func (s *Strategy) AddUninterestingTag(tag string) {
+	s.uninterestingTags = append(s.uninterestingTags, tag)
+}
+
+func (s *Strategy) isInterestingTag(tag string) bool {
+	for _, t := range s.uninterestingTags {
+		if t == tag {
+			return false
+		}
+	}
+	return true
+}
+
 // ListPackages reports Go package information about all directories in the tree
 // at or below the provided fileRoot.
 //
@@ -136,7 +164,7 @@ func ListPackages(fileRoot, importRoot string) (PackageTree, error) {
 			Dir:        wp,
 			ImportPath: ip,
 		}
-		err = fillPackage(p)
+		err = DefaultStrategy().fillPackage(p)
 
 		if err != nil {
 			switch err.(type) {
@@ -209,7 +237,7 @@ func ListPackages(fileRoot, importRoot string) (PackageTree, error) {
 }
 
 // fillPackage full of info. Assumes p.Dir is set at a minimum
-func fillPackage(p *build.Package) error {
+func (s *Strategy) fillPackage(p *build.Package) error {
 	var buildPrefix = "// +build "
 	var buildFieldSplit = func(r rune) bool {
 		return unicode.IsSpace(r) || r == ','
@@ -249,7 +277,8 @@ func fillPackage(p *build.Package) error {
 		testFile := strings.HasSuffix(file, "_test.go")
 		fname := filepath.Base(file)
 
-		var ignored bool
+		allIgnored := true
+		hasExplicitTags := false
 		for _, c := range pf.Comments {
 			ic := findImportComment(pf.Name, c)
 			if ic != "" {
@@ -270,27 +299,31 @@ func fillPackage(p *build.Package) error {
 				continue
 			}
 
-			for _, t := range strings.FieldsFunc(ct[len(buildPrefix):], buildFieldSplit) {
-				// hardcoded (for now) handling for the "ignore" build tag
-				if t == "ignore" {
-					ignored = true
+			tags := strings.FieldsFunc(ct[len(buildPrefix):], buildFieldSplit)
+			for _, t := range tags {
+				hasExplicitTags = true
+				if s.isInterestingTag(t) {
+					allIgnored = false
+					break
 				}
 			}
 		}
 
+		important := !hasExplicitTags || !allIgnored
+
 		if testFile {
 			p.TestGoFiles = append(p.TestGoFiles, fname)
-			if p.Name == "" && !ignored {
+			if p.Name == "" && important {
 				p.Name = strings.TrimSuffix(pf.Name.Name, "_test")
 			}
 		} else {
-			if p.Name == "" && !ignored {
+			if p.Name == "" && important {
 				p.Name = pf.Name.Name
 			}
 			p.GoFiles = append(p.GoFiles, fname)
 		}
 
-		if ignored {
+		if !important {
 			continue
 		}
 
