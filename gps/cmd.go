@@ -21,13 +21,23 @@ func (c cmd) SetEnv(env []string) {
 }
 
 func init() {
-	// For our git repositories, we very much assume a "regular" topology.
+	// For our repositories, we very much assume a "regular" topology.
 	// Therefore, no value for the following variables can be relevant to
 	// us. Unsetting globally properly propagates to libraries like
 	// github.com/Masterminds/vcs, which cannot make the same assumption in
 	// general.
-	parasiteGitVars := []string{"GIT_DIR", "GIT_INDEX_FILE", "GIT_OBJECT_DIRECTORY", "GIT_WORK_TREE"}
-	for _, e := range parasiteGitVars {
+	parasiteVars := []string{
+		"GIT_DIR", "GIT_INDEX_FILE", "GIT_OBJECT_DIRECTORY", "GIT_WORK_TREE",
+	}
+	for _, e := range parasiteVars {
 		os.Unsetenv(e)
+	}
+
+	// Extensions can have unfortunate side-effects. Disable those
+	emptyVars := []string{
+		"HGRCPATH",
+	}
+	for _, e := range emptyVars {
+		os.Setenv(e, "")
 	}
 }
