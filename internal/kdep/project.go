@@ -171,7 +171,7 @@ type dependency struct {
 
 // HackGodepsCompat generates a godep-like manifest for compatibility
 func (p *Project) HackGodepsCompat(s gps.Solution) error {
-	if FallbackToDep {
+	if FallbackToDep || !p.Manifest.Meta.GodepCompat {
 		return nil
 	}
 
