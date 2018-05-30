@@ -169,6 +169,18 @@ func PruneProject(baseDir string, lp LockedProject, options PruneOptions, logger
 		}
 	}
 
+	// refresh fsState to figure out what's remaining
+	fsState, err = deriveFilesystemState(baseDir)
+	if err != nil {
+		return errors.Wrap(err, "could not derive filesystem state")
+	}
+
+	if (options & PruneNonGoFiles) != 0 {
+		if err := deleteLegaleseOnlyDirs(fsState); err != nil {
+			return errors.Wrap(err, "failed to prune legalese-only dirs")
+		}
+	}
+
 	if err := deleteEmptyDirs(fsState); err != nil {
 		return errors.Wrap(err, "could not delete empty dirs")
 	}
@@ -366,6 +378,39 @@ func pruneGoTestFiles(fsState filesystemState) error {
 		}
 	}
 
+	return nil
+}
+
+func isLegaleseOnly(fsState filesystemState, dir string) bool {
+	for _, f := range fsState.files {
+		if !strings.HasPrefix(f, dir) {
+			continue
+		}
+
+		fname := filepath.Base(f)
+		if !isPreservedFile(fname) {
+			return false
+		}
+	}
+	return true
+}
+
+func deleteLegaleseOnlyDirs(fsState filesystemState) error {
+	sort.Sort(sort.Reverse(sort.StringSlice(fsState.dirs)))
+
+	toDelete := make([]string, 0)
+
+	for _, dir := range fsState.dirs {
+		if isLegaleseOnly(fsState, dir) {
+			toDelete = append(toDelete, filepath.Join(fsState.root, dir))
+		}
+	}
+
+	for _, path := range toDelete {
+		if err := os.RemoveAll(path); err != nil && !os.IsNotExist(err) {
+			return err
+		}
+	}
 	return nil
 }
 
