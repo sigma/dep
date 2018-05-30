@@ -813,3 +813,58 @@ func TestDeleteEmptyDirs(t *testing.T) {
 		})
 	}
 }
+
+func TestDeleteLegaleseOnlyDirs(t *testing.T) {
+	testcases := []struct {
+		name string
+		fs   fsTestCase
+	}{
+		{
+			name: "mixed-dirs",
+			fs: fsTestCase{
+				before: filesystemState{
+					dirs: []string{
+						"pkg1",
+						"pkg1/pkg2",
+						"pkg1/pkg2/pkg4",
+						"pkg1/pkg3",
+					},
+					files: []string{
+						"pkg1/pkg2/pkg4/LICENSE",
+						"pkg1/pkg3/ok.txt",
+					},
+				},
+				after: filesystemState{
+					dirs: []string{
+						"pkg1",
+						"pkg1/pkg3",
+					},
+					files: []string{
+						"pkg1/pkg3/ok.txt",
+					},
+				},
+			},
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			h := test.NewHelper(t)
+			h.Cleanup()
+			h.TempDir(".")
+
+			tc.fs.before.root = h.Path(".")
+			tc.fs.after.root = h.Path(".")
+
+			if err := tc.fs.before.setup(); err != nil {
+				t.Fatal("unexpected error in fs setup: ", err)
+			}
+
+			if err := deleteLegaleseOnlyDirs(tc.fs.before); err != nil {
+				t.Fatal("unexpected error in deleteLegaleseOnlyDirs: ", err)
+			}
+
+			tc.fs.assert(t)
+		})
+	}
+}
