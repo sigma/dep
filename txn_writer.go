@@ -333,6 +333,14 @@ func (sw *SafeWriter) Write(root string, sm gps.SourceManager, examples bool, lo
 		}
 	}
 
+	// Ensure vendor/OWNERS is preserved if present
+	if hasOwners(vpath) {
+		err = fs.RenameWithFallback(filepath.Join(vpath, "OWNERS"), filepath.Join(td, "vendor/OWNERS"))
+		if _, ok := err.(*os.LinkError); ok {
+			return errors.Wrap(err, "failed to preserve vendor/OWNERS")
+		}
+	}
+
 	// Move the existing files and dirs to the temp dir while we put the new
 	// ones in, to provide insurance against errors for as long as possible.
 	type pathpair struct {
@@ -476,6 +484,12 @@ func (sw *SafeWriter) PrintPreparedActions(output *log.Logger, verbose bool) err
 // hasDotGit checks if a given path has .git file or directory in it.
 func hasDotGit(path string) bool {
 	gitfilepath := filepath.Join(path, ".git")
+	_, err := os.Stat(gitfilepath)
+	return err == nil
+}
+
+func hasOwners(path string) bool {
+	gitfilepath := filepath.Join(path, "OWNERS")
 	_, err := os.Stat(gitfilepath)
 	return err == nil
 }
