@@ -329,11 +329,17 @@ func (cmd *ensureCommand) runDefault(ctx *kdep.Ctx, args []string, p *kdep.Proje
 		return errors.Wrap(err, "grouped write of manifest, lock and vendor")
 	}
 
+	err = p.HackExtraVendorEntries()
+	if err != nil {
+		return errors.Wrap(err, "failed to generate extra vendor entries")
+	}
+
 	err = p.HackGodepsCompat(solution)
 	if err != nil {
 		return errors.Wrap(err, "failed to generate Godeps.json")
 	}
-	return p.HackExtraVendorEntries()
+
+	return nil
 }
 
 func (cmd *ensureCommand) runVendorOnly(ctx *kdep.Ctx, args []string, p *kdep.Project, sm gps.SourceManager, params gps.SolveParameters) error {
@@ -428,11 +434,17 @@ func (cmd *ensureCommand) runUpdate(ctx *kdep.Ctx, args []string, p *kdep.Projec
 		return errors.Wrap(err, "grouped write of manifest, lock and vendor")
 	}
 
+	err = p.HackExtraVendorEntries()
+	if err != nil {
+		return errors.Wrap(err, "failed to generate extra vendor entries")
+	}
+
 	err = p.HackGodepsCompat(solution)
 	if err != nil {
 		return errors.Wrap(err, "failed to generate Godeps.json")
 	}
-	return p.HackExtraVendorEntries()
+
+	return nil
 }
 
 func (cmd *ensureCommand) runAdd(ctx *kdep.Ctx, args []string, p *kdep.Project, sm gps.SourceManager, params gps.SolveParameters) error {
