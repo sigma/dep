@@ -81,7 +81,7 @@ func (b *internalBuilder) getPackageDependencies() ([]string, error) {
 		}
 
 		base := filepath.Base(path)
-		if base == "vendor" || base == "testdata" || strings.HasPrefix(".", base) || strings.HasPrefix("_", base) {
+		if base == "vendor" || base == "testdata" || strings.HasPrefix(base, ".") || strings.HasPrefix(base, "_") {
 			return filepath.SkipDir
 		}
 
