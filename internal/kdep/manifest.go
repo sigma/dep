@@ -30,12 +30,13 @@ import (
 
 // Metadata holds kdep metadata information
 type Metadata struct {
-	IsKdepRoot        bool     `toml:"kdep-project,omitempty"`
-	IsKdepChild       bool     `toml:"kdep-child,omitempty"`
-	GodepCompat       bool     `toml:"kdep-godep-compat,omitempty"`
-	LocalGopaths      []string `toml:"kdep-local-gopaths"`
-	LocalDeps         []string `toml:"kdep-local-deps"`
-	UninterestingTags []string `toml:"kdep-uninteresting-tags"`
+	IsKdepRoot          bool     `toml:"kdep-project,omitempty"`
+	IsKdepChild         bool     `toml:"kdep-child,omitempty"`
+	GodepCompat         bool     `toml:"kdep-godep-compat,omitempty"`
+	LocalGopaths        []string `toml:"kdep-local-gopaths"`
+	LocalDeps           []string `toml:"kdep-local-deps"`
+	UninterestingTags   []string `toml:"kdep-uninteresting-tags"`
+	BlackListedPackages []string `toml:"kdep-blacklisted-packages"`
 }
 
 type manifest struct {
