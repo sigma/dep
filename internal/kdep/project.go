@@ -99,6 +99,7 @@ func WrapProject(p *dep.Project, c *Ctx) (*Project, error) {
 		Package:       string(p.ImportRoot),
 		LocalPackages: m.Meta.LocalDeps,
 		SkipSubdirs:   m.Meta.LocalGopaths,
+		BlackList:     m.Meta.BlackListedPackages,
 	}
 	deps, err := b.GetPackageDependencies()
 	if err != nil {
