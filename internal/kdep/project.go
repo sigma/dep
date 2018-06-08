@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/golang/dep"
@@ -181,8 +182,17 @@ func (p *Project) HackGodepsCompat(s gps.Solution) error {
 		}
 	}
 
+	packages := make([]string, 0)
+	for pck, _ := range p.Manifest.Manifest.RequiredPackages() {
+		packages = append(packages, pck)
+	}
+	sort.Slice(packages, func(i, j int) bool {
+		return strings.Compare(packages[i], packages[j]) < 0
+	})
+
 	gd := dependencies.Godeps{
 		ImportPath: string(p.ImportRoot),
+		Packages:   packages,
 		Deps:       deps,
 	}
 	err := gd.DumpToFile(godepsJSONPath)
