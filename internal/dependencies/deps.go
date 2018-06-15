@@ -17,6 +17,7 @@
 package dependencies
 
 import (
+	"fmt"
 	"go/parser"
 	"go/token"
 	"os"
@@ -272,6 +273,10 @@ func (b *internalBuilder) packageAllDeps(pack string) (Node, error) {
 	pkgs, err := parser.ParseDir(fset, pack, nil, parser.ImportsOnly)
 	if err != nil {
 		return Node{}, err
+	}
+
+	if len(pkgs) == 0 {
+		return Node{}, fmt.Errorf("not a go package")
 	}
 
 	for _, p := range pkgs {
