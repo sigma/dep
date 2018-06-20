@@ -921,9 +921,26 @@ func validateUpdateArgs(ctx *kdep.Ctx, args []string, p *kdep.Project, sm gps.So
 			}
 
 			if !gps.IsAny(pc.Constraint) {
-				// TODO(sdboyer) constraints should be allowed to allow solves that
-				// target particular versions while remaining within declared constraints.
-				errCh <- errors.Errorf("version constraint %s passed for %s, but -update follows constraints declared in %s, not CLI arguments", pc.Constraint, pc.Ident.ProjectRoot, dep.ManifestName)
+				var baseConstraint gps.Constraint
+				for proj, c := range p.Manifest.Constraints {
+					if proj == pc.Ident.ProjectRoot {
+						baseConstraint = c.Constraint
+					}
+				}
+				if baseConstraint == nil {
+					errCh <- errors.Errorf("version constraint %s passed for %s, but -update requires constraints declared in %s", pc.Constraint, pc.Ident.ProjectRoot, dep.ManifestName)
+				}
+
+				if !pc.Constraint.MatchesAny(baseConstraint) {
+					errCh <- errors.Errorf("version constraint %s is incompatible with base constraint %s", pc.Constraint, baseConstraint)
+				}
+
+				props := p.Manifest.Constraints[pc.Ident.ProjectRoot]
+				props.Constraint = baseConstraint.Intersect(pc.Constraint)
+				p.Manifest.Constraints[pc.Ident.ProjectRoot] = props
+				// tweak the argument: pass only the project root, since we
+				// modified the constraint in Manifest.
+				argsCh <- string(pc.Ident.ProjectRoot)
 				return
 			}
 
